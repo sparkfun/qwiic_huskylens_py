@@ -74,12 +74,6 @@ class QwiicHuskylens(object):
     # 4. Make a request for Blocks or Arrows
     # 5. Analyze returned data and take action
 
-    # Plan: 
-    # One method for each command
-    # Higher level methods that perform full sequence of commands for each algorithm
-    # Useful interpretation/conversion of returned information
-    # Examples using each higher level method
-
     # Commands
     kCommandRequest = 0x20 # Request all blocks and arrows from the HUSKYLENS
     kCommandRequestBlocks = 0x21 # Request all blocks from the HUSKYLENS
@@ -721,11 +715,11 @@ class QwiicHuskylens(object):
         
         return response.data[0] == 1
     
-    def request_firmware_version(self):
-        """!
-        Request the firmware version of the Huskylens. Not specified where this goes...
-        """
-        self._send_command(self.kCommandRequestFirmwareVersion)
+    # def request_firmware_version(self):
+    #     """!
+    #     Request the firmware version of the Huskylens. Not specified where this goes...
+    #     """
+    #     self._send_command(self.kCommandRequestFirmwareVersion)
 
         # The ICD is blank for the response to this or where this goes...
         # response = self._get_response()
