@@ -644,11 +644,27 @@ class QwiicHuskylens(object):
 
         return True
 
+    def write_to_screen(self, text, x=0, y=0):
+        """!
+        Place a string of text on the Huskylens UI
+
+        @param str text: The text to display
+        @param int x: The x-coordinate of the text
+        @param int y: The y-coordinate of the text
+        """
+        self.request_custom_text(text, x, y)
+
     def request_clear_text(self):
         """!
         Clear and delete all custom UI texts from the screen
         """
         self._send_command(self.kCommandRequestClearText)
+    
+    def clear_screen(self):
+        """!
+        Clear and delete all custom UI texts from the screen
+        """
+        self.request_clear_text()
     
     def request_learn(self, id):
         """!
