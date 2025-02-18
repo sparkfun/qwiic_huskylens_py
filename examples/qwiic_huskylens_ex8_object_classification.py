@@ -58,10 +58,13 @@ def runExample():
 		return
 
 	# Initialize the device
-	myHuskylens.begin()
+	if myHuskylens.begin() == False:
+		print("Failed to initialize the device. Please check your connection", file=sys.stderr)
+		return
 
-	myHuskylens.request_forget() # Forget all the objects that the device has already learned
-	myHuskylens.request_algorithm(myHuskylens.kAlgorithmObjectClassification) # The device has several algorithms, we want to use object classification
+	myHuskylens.forget() # Forget all the objects that the device has already learned
+	if myHuskylens.set_algorithm(myHuskylens.kAlgorithmObjectClassification) == False: # The device has several algorithms, we want to use object classification
+		print("Failed to set algorithm. Please try running again.", file=sys.stderr)
 
 	# Prompt user to learn the first object
 	print("Lets teach the HuskyLens an object to learn.")
@@ -74,14 +77,12 @@ def runExample():
 	print("Object learned!")
 
 	print("Continue moving The object around until the Huskylen can track it at different angles.")
-	print("Will train for 10 seconds")
+	print("Will train for 15 seconds")
 
 	startTime = millis()
-	while (millis() - startTime < 10000):
+	while (millis() - startTime < 15000):
 		# Wait for the device to see the object
-		myHuskylens.request_blocks()
-		while (len(myHuskylens.blocks) == 0):
-			myHuskylens.request_blocks()
+		myHuskylens.wait_for_objects_of_interest()
 
 		# Learn the object at the new angle
 		myHuskylens.learn_same()
@@ -98,14 +99,12 @@ def runExample():
 	print("Object learned!")
 
 	print("Continue moving The object around until the Huskylen can track it at different angles.")
-	print("Will train for 10 seconds")
+	print("Will train for 15 seconds")
 
 	startTime = millis()
-	while (millis() - startTime < 10000):
+	while (millis() - startTime < 15000):
 		# Wait for the device to see the object
-		myHuskylens.request_blocks()
-		while (len(myHuskylens.blocks) == 0):
-			myHuskylens.request_blocks()
+		myHuskylens.wait_for_objects_of_interest()
 
 		# Learn the object at the new angle
 		myHuskylens.learn_same()
@@ -115,23 +114,21 @@ def runExample():
 	# The block will not move with the object, but the ID will be the closest match the algorithm can make to an ID we have taught it
 	nScans = 0
 	while True:
-		myHuskylens.request_blocks()
-		if len(myHuskylens.blocks) == 0:
-			print("No blocks found")
+		# This function will return a list of objects of interest that the device sees
+		# In object classification mode, these objects will have the ID of one of the objects we have learned
+		myClassifications = myHuskylens.get_objects_of_interest()
+		if len(myClassifications) == 0:
+			print("No objects found")
 		else:
 			print("----------------------New Objects Scan #{}----------------------".format(nScans))
-			myblocks = myHuskylens.blocks # Each recognized block will be stored in a "block" object containing the block's information
 
-			for i, block in enumerate(myblocks):
-				print("object #{}".format(i))
-				name = myHuskylens.get_name_for_id(block.id) # The myHuskylens object keeps track of the names we have assigned this program run
-				if name:
-					print("object Name: " + name)
-				print ("object ID: " + str(block.id))
-				print ("object X: " + str(block.xCenter))
-				print ("object Y: " + str(block.yCenter))
-				print ("object Width: " + str(block.width))
-				print ("object Height: " + str(block.height))
+			for classification in myClassifications:
+				print ("object ID: " + str(classification.id))
+				# Note: The below values have less meaning in classification mode, as the returned block will not move with the object
+				print ("object X: " + str(classification.xCenter))
+				print ("object Y: " + str(classification.yCenter))
+				print ("object Width: " + str(classification.width))
+				print ("object Height: " + str(classification.height))
 				print("\n")
 
 				nScans += 1

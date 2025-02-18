@@ -50,21 +50,22 @@ def runExample():
 		return
 
 	# Initialize the device
-	myHuskylens.begin()
+	if myHuskylens.begin() == False:
+		print("Failed to initialize the device. Please check your connection", file=sys.stderr)
+		return
 
-	myHuskylens.request_forget() # Forget all the objects that the device has already learned
-	myHuskylens.request_algorithm(myHuskylens.kAlgorithmColorRecognition) # The device has several algorithms, we want to use color recognition
+	myHuskylens.forget() # Forget all the objects that the device has already learned
+	myHuskylens.set_algorithm(myHuskylens.kAlgorithmColorRecognition) # The device has several algorithms, we want to use color recognition
 
-	# 
+	# Prompt user to learn the first color
 	print("Lets teach the HuskyLens the first color and assign it an ID of 1.")
 	print("Please show a color to the camera until it is outlined in a square, and then enter anything to continue.")
 	input()
 	print("Will attempt to learn the color in 3 seconds.")
 	time.sleep(3)
 
-	# The device will return "blocks" when it sees what it thinks is a chunk of color while in color recognition mode
-	while (len(myHuskylens.blocks) == 0):
-		myHuskylens.request_blocks()
+	# This function will return when it sees a chunk of color while in color recognition mode
+	myHuskylens.wait_for_objects_of_interest()
 
 	# When the device sees the color, let's learn it!
 	myHuskylens.learn_new()
@@ -78,7 +79,7 @@ def runExample():
 	print("Will attempt to learn the color in 3 seconds.")
 	time.sleep(3)
 
-	# Note how we don't request blocks this time, as we're not looking for a square around the color
+	# Note how we don't wait for objects of interest this time, as we're not looking for a square around the color
 
 	myHuskylens.learn_new()
 	print("Color learned!")
@@ -88,13 +89,13 @@ def runExample():
 	print("They should have the expected IDs.")
 
 	while True:
-		myHuskylens.request_blocks()
-		if len(myHuskylens.blocks) == 0:
-			print("No blocks found")
+		# This function will return a list of objects of interest that the device sees
+		# In color recognition mode, these objects will be squares around matches to the colors we have learned
+		myColors = myHuskylens.get_objects_of_interest()
+		if len(myColors) == 0:
+			print("No colors found")
 		else:
 			print("----------------------New Colors Scan #{}----------------------".format(nScans))
-			myColors = myHuskylens.blocks # Each recognized object will be stored in a "block" object containing the object's information
-
 			for i, color in enumerate(myColors):
 				print ("Color ID: " + str(color.id))
 				print ("Color X: " + str(color.xCenter))

@@ -50,10 +50,12 @@ def runExample():
 		return
 
 	# Initialize the device
-	myHuskylens.begin()
+	if myHuskylens.begin() == False:
+		print("Failed to initialize the device. Please check your connection", file=sys.stderr)
+		return
 
-	myHuskylens.request_forget() # Forget all the objects that the device has already learned
-	myHuskylens.request_algorithm(myHuskylens.kAlgorithmObjectRecognition) # The device has several algorithms, we want to use object recognition
+	myHuskylens.forget() # Forget all the objects that the device has already learned
+	myHuskylens.set_algorithm(myHuskylens.kAlgorithmObjectRecognition) # The device has several algorithms, we want to use object recognition
 
 	# Prompt user to "learn" an object by assigning it an ID
 	# The Huskylens has 20 preset objects that it can detect:
@@ -67,9 +69,8 @@ def runExample():
 	print("Will attempt to learn the object in 3 seconds.")
 	time.sleep(3)
 
-	# The device will return "blocks" when it sees one of the 20 preset objects while in object recognition mode
-	while (len(myHuskylens.blocks) == 0):
-		myHuskylens.request_blocks()
+	# Wait for the device to see an object
+	myHuskylens.wait_for_objects_of_interest()
 
 	# When the device sees an object, let's learn it!
 	myHuskylens.learn_new()
@@ -82,9 +83,7 @@ def runExample():
 	print("Will attempt to learn the object in 3 seconds.")
 	time.sleep(3)
 
-	myHuskylens.request_blocks()
-	while (len(myHuskylens.blocks) == 0):
-		myHuskylens.request_blocks()
+	myHuskylens.wait_for_objects_of_interest()
 
 	myHuskylens.learn_new()
 	print("Object learned!")
@@ -94,9 +93,11 @@ def runExample():
 	print("They should have the expected IDs.")
 
 	while True:
-		myHuskylens.request_blocks()
-		if len(myHuskylens.blocks) == 0:
-			print("No blocks found")
+		# This function will return a list of objects of interest that the device sees
+		# In object recognition mode, these objects will be one of the 20 preset objects if they are recognized
+		myObjects = myHuskylens.get_objects_of_interest()
+		if len(myObjects) == 0:
+			print("No objects found")
 		else:
 			print("----------------------New Objects Scan #{}----------------------".format(nScans))
 			myObjects = myHuskylens.blocks # Each recognized object will be stored in a "block" object containing the object's information

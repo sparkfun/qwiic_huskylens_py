@@ -50,25 +50,26 @@ def runExample():
 		return
 
 	# Initialize the device
-	myHuskylens.begin()
+	if myHuskylens.begin() 	== False:
+		print("Failed to initialize the device. Please check your connection", file=sys.stderr)
+		return
 
-	myHuskylens.request_forget() # Forget all the objects that the device has already learned
-	myHuskylens.request_algorithm(myHuskylens.kAlgorithmTagRecognition) # The device has several algorithms, we want to use tag recognition
+	myHuskylens.forget() # Forget all the objects that the device has already learned
+	myHuskylens.set_algorithm(myHuskylens.kAlgorithmTagRecognition) # The device has several algorithms, we want to use tag recognition
 
-	# 
+	# Prompt user to "learn" a tag by assigning it an ID
 	print("Lets teach the HuskyLens the first tag and assign it an ID of 1.")
 	print("Please show a tag to the camera until it is outlined in a square, and then enter anything to continue.")
 	input()
 	print("Will attempt to learn the tag in 3 seconds.")
 	time.sleep(3)
 
-	# The device will return "blocks" when it sees what it thinks is a tag while in tag recognition mode
-	while (len(myHuskylens.blocks) == 0):
-		myHuskylens.request_blocks()
+	# This function will return when it sees a tag while in tag recognition mode
+	myHuskylens.wait_for_objects_of_interest()
 
 	# When the device sees the tag, let's learn it!
 	myHuskylens.learn_new()
-	print("tag learned and assigned ID 1!")
+	print("Tag learned and assigned ID 1!")
 
 	# Prompt user to learn the second tag, and ask for the name
 	print("Lets teach the HuskyLens the second tag and assign it an ID of 2.")
@@ -79,9 +80,7 @@ def runExample():
 	print("Will attempt to learn the tag in 3 seconds.")
 	time.sleep(3)
 
-	myHuskylens.request_blocks()
-	while (len(myHuskylens.blocks) == 0):
-		myHuskylens.request_blocks()
+	myHuskylens.wait_for_objects_of_interest()
 
 	myHuskylens.learn_new()
 	print("tag learned!")
@@ -91,12 +90,13 @@ def runExample():
 	print("They should have the expected IDs.")
 
 	while True:
-		myHuskylens.request_blocks()
-		if len(myHuskylens.blocks) == 0:
-			print("No blocks found")
+		# This function will return a list of objects of interest that the device sees
+		# In tag recognition mode, these objects will be tags
+		myTags = myHuskylens.get_objects_of_interest()
+		if len(myTags) == 0:
+			print("No tags found")
 		else:
 			print("----------------------New tags Scan #{}----------------------".format(nScans))
-			myTags = myHuskylens.blocks # Each recognized object will be stored in a "block" object containing the object's information
 
 			for i, tag in enumerate(myTags):
 				print ("tag ID: " + str(tag.id))

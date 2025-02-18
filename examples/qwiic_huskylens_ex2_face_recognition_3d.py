@@ -50,10 +50,12 @@ def runExample():
 		return
 
 	# Initialize the device
-	myHuskylens.begin()
+	if myHuskylens.begin() == False:
+		print("Failed to initialize the device. Please check your connection", file=sys.stderr)
+		return
 
-	myHuskylens.request_forget() # Forget all the faces that the device has already learned
-	myHuskylens.request_algorithm(myHuskylens.kAlgorithmFaceRecognition) # The device has several algorithms, we want to use face recognition
+	myHuskylens.forget() # Forget all the faces that the device has already learned
+	myHuskylens.set_algorithm(myHuskylens.kAlgorithmFaceRecognition) # The device has several algorithms, we want to use face recognition
 
 	# Prompt user to learn the first face, and ask for the name
 	print("Lets teach the HuskyLens a 3D face. It will need a few angles to recognize the face.")
@@ -61,9 +63,8 @@ def runExample():
 	print("Please show the face to the camera. Will attempt to learn the face in 3 seconds.")
 	time.sleep(3)
 
-	# The device will return "blocks" when it sees a face while in face recognition mode
-	while (len(myHuskylens.blocks) == 0):
-		myHuskylens.request_blocks()
+	# This function will return when it sees a face while in face recognition mode
+	myHuskylens.wait_for_objects_of_interest()
 
 	# When the device sees a face, let's learn it!
 	myHuskylens.learn_new()
@@ -77,23 +78,18 @@ def runExample():
 		input()
 		print("Will attempt to learn the face in 2 seconds.")
 		time.sleep(2)
-		myHuskylens.request_blocks()
-		while (len(myHuskylens.blocks) == 0):
-			myHuskylens.request_blocks()
+		myHuskylens.wait_for_objects_of_interest()
 		myHuskylens.learn_same()
 		print("Angle #{} learned!".format(i+2))
 
 	nScans = 0
 	while True:
-		myHuskylens.request_blocks()
-		if len(myHuskylens.blocks) == 0:
-			print("No blocks found")
+		myFaces = myHuskylens.get_objects_of_interest()
+		if len(myFaces) == 0:
+			print("No faces found")
 		else:
 			print("----------------------New Faces Scan #{}----------------------".format(nScans))
-			myFaces = myHuskylens.blocks # Each recognized face will be stored in a "block" object containing the face's information
-
-			for i, face in enumerate(myFaces):
-				print("Face #{}".format(i))
+			for face in myFaces:
 				name = myHuskylens.get_name_for_id(face.id) # The myHuskylens object keeps track of the names we have assigned this program run
 				if name:
 					print("Face Name: " + name)

@@ -37,14 +37,6 @@ import qwiic_huskylens
 import sys
 import time
 
-# Provide platform-dependent way to get current time in milliseconds
-if hasattr(time, "monotonic_ns"):
-	def millis():
-		return time.monotonic_ns() // 1000000 # works in CircuitPython and Linux/Raspberry Pi
-else:
-	def millis():
-		return time.time_ns() // 1000000 #only works in MicroPython
-	
 def runExample():
 	print("\nQwiic Huskylens Example 3 - Object Tracking\n")
 
@@ -58,10 +50,12 @@ def runExample():
 		return
 
 	# Initialize the device
-	myHuskylens.begin()
+	if myHuskylens.begin() == False:
+		print("Failed to initialize the device. Please check your connection", file=sys.stderr)
+		return
 
-	myHuskylens.request_forget() # Forget all the objects that the device has already learned
-	myHuskylens.request_algorithm(myHuskylens.kAlgorithmObjectTracking) # The device has several algorithms, we want to use object tracking
+	myHuskylens.forget() # Forget all the objects that the device has already learned
+	myHuskylens.set_algorithm(myHuskylens.kAlgorithmObjectTracking) # The device has several algorithms, we want to use object tracking
 
 	# Prompt user to learn the first object
 	print("Lets teach the HuskyLens an object to track.")
@@ -74,35 +68,24 @@ def runExample():
 	print("Object learned!")
 
 	print("Continue moving The object around until the Huskylen can track it at different angles.")
-	print("will train for 3 seconds")
-
-	startTime = millis()
-	while (millis() - startTime < 3000):
-		# Wait for the device to see the object
-		myHuskylens.request_blocks()
-		while (len(myHuskylens.blocks) == 0):
-			myHuskylens.request_blocks()
-
-		# Learn the object at the new angle
-		myHuskylens.learn_same()
-		time.sleep(0.1)
 
 	nScans = 0
 	while True:
-		myHuskylens.request_blocks()
-		if len(myHuskylens.blocks) == 0:
-			print("No blocks found")
-		else:
-			print("----------------------New Blocks Scan #{}----------------------".format(nScans))
-			myblocks = myHuskylens.blocks # Each recognized block will be stored in a "block" object containing the block's information
+		# This function will return a list of objects of interest that the device sees
+		# In object tracking mode, these objects will be the object we have learned
+		myObjs = myHuskylens.get_objects_of_interest()
 
-			for i, block in enumerate(myblocks):
-				print("object #{}".format(i))
-				print ("object ID: " + str(block.id))
-				print ("object X: " + str(block.xCenter))
-				print ("object Y: " + str(block.yCenter))
-				print ("object Width: " + str(block.width))
-				print ("object Height: " + str(block.height))
+		if len(myObjs) == 0:
+			print("No objects found")
+		else:
+			print("----------------------New Objects Scan #{}----------------------".format(nScans))
+
+			for obj in myObjs:
+				print ("object ID: " + str(obj.id))
+				print ("object X: " + str(obj.xCenter))
+				print ("object Y: " + str(obj.yCenter))
+				print ("object Width: " + str(obj.width))
+				print ("object Height: " + str(obj.height))
 				print("\n")
 
 				nScans += 1

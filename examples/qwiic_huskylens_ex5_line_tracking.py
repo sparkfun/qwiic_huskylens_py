@@ -50,19 +50,20 @@ def runExample():
 		return
 
 	# Initialize the device
-	myHuskylens.begin()
+	if myHuskylens.begin() == False:
+		print("Failed to initialize the device. Please check your connection", file=sys.stderr)
+		return
 
-	myHuskylens.request_forget() # Forget all the objects that the device has already learned
-	myHuskylens.request_algorithm(myHuskylens.kAlgorithmLineTracking) # The device has several algorithms, we want to use line tracking
+	myHuskylens.forget() # Forget all the objects that the device has already learned
+	myHuskylens.set_algorithm(myHuskylens.kAlgorithmLineTracking) # The device has several algorithms, we want to use line tracking
 
 	# Prompt user to "learn" a line by assigning it an ID
 	print("Lets teach the HuskyLens a line to track and assign it an ID of 1.")
 	print("Please show a line on a solid background. Wait until an arrow appears somewhat steadily along your line and then enter anything to continue.")
 	input()
 
-	# The device will return "arrows" when it sees lines while in line tracking mode
-	while (len(myHuskylens.arrows) == 0):
-		myHuskylens.request_arrows()
+	# 
+	myHuskylens.wait_for_lines_of_interest()
 
 	# When the device sees a line to track, let's learn it!
 	myHuskylens.learn_new()
@@ -71,12 +72,13 @@ def runExample():
 	# Now we should receive arrows giving us the direction of the line to follow
 	nScans = 0
 	while True:
-		myHuskylens.request_arrows()
-		if len(myHuskylens.arrows) == 0:
+		# This function will return a list of lines of interest that the device sees
+		# In line tracking mode, the device will return "arrows" that show the direction of the line
+		myArrows = myHuskylens.get_lines_of_interest()
+		if len(myArrows) == 0:
 			print("No arrows found")
 		else:
 			print("----------------------New Objects Scan #{}----------------------".format(nScans))
-			myArrows = myHuskylens.arrows # We will receive directional routing arrows to follow the line
 
 			for i, arrow in enumerate(myArrows):
 				# Unfortunately, the device doesn't return the name of the object, but shows it on the screen

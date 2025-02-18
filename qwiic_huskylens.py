@@ -219,7 +219,6 @@ class QwiicHuskylens(object):
         leftToRead = readBytes[3] + 1 # Data length + 1 byte for checksum
         readBytes.extend(list(self._i2c.read_block(self.address, None, leftToRead)))
 
-        print("Read bytes: ", readBytes)
         return self._Response(readBytes)
 
     def request_knock(self):
@@ -380,6 +379,56 @@ class QwiicHuskylens(object):
         # Get the response
         return self._handle_response_mixed(self._get_response())
     
+    def wait_for_objects_of_interest(self):
+        """!
+        Wait for the Huskylens to detect objects of interest (blocks) based on the current algorithm
+        """
+        while True:
+            self.request_blocks()
+            if len(self.blocks) > 0:
+                break
+    
+    def wait_for_lines_of_interest(self):
+        """!
+        Wait for the Huskylens to detect lines of interest (arrows) based on the current algorithm
+        """
+        while True:
+            self.request_arrows()
+            if len(self.arrows) > 0:
+                break
+
+    def get_objects_of_interest(self):
+        """!
+        Get the objects of interest (blocks) detected by the Huskylens based on the current algorithm
+
+        Returned objects have the following properties:
+        - id: The ID of the object
+        - xCenter: The x-coordinate of the center of the object
+        - yCenter: The y-coordinate of the center of the object
+        - width: The width of the object
+        - height: The height of the object
+
+        @return **list** A list of Block objects
+        """
+        self.request_blocks()
+        return self.blocks
+
+    def get_lines_of_interest(self):
+        """!
+        Get the lines of interest (arrows) detected by the Huskylens based on the current algorithm
+
+        Returned objects have the following properties:
+        - id: The ID of the object
+        - xOrigin: The x-coordinate of the origin of the line
+        - yOrigin: The y-coordinate of the origin of the line
+        - xTarget: The x-coordinate of the target of the line
+        - yTarget: The y-coordinate of the target of the line
+
+        @return **list** A list of Arrow objects
+        """
+        self.request_arrows()
+        return self.arrows
+
     def request_blocks(self):
         """!
         Request all blocks from the Huskylens
@@ -504,6 +553,16 @@ class QwiicHuskylens(object):
         response = self._get_response()
         return response.valid and response.command == self.kCommandReturnOk
 
+    def set_algorithm(self, algorithm):
+        """!
+        Change the algorithm of the Huskylens
+
+        @param int algorithm: The algorithm to set. See the kAlgorithm constants.
+
+        @return **bool** `True` if successful, otherwise `False`.
+        """
+        return self.request_algorithm(algorithm)
+
     def request_custom_names(self, id, name):
         """!
         Set a custom name for a learned object from the Huskylens
@@ -620,6 +679,12 @@ class QwiicHuskylens(object):
         self.idToName = {}
         self._send_command(self.kCommandRequestForget)
     
+    def forget(self):
+        """!
+        Forget all learned objects for the current running algorithm
+        """
+        self.request_forget()
+    
     def request_save_screenshot(self):
         """!
         Save a screenshot of the current UI to the Huskylens SD Card
@@ -642,9 +707,7 @@ class QwiicHuskylens(object):
     
     def request_firmware_version(self):
         """!
-        Request the firmware version of the Huskylens
-
-        @return **str** The firmware version
+        Request the firmware version of the Huskylens. Not specified where this goes...
         """
         self._send_command(self.kCommandRequestFirmwareVersion)
 
