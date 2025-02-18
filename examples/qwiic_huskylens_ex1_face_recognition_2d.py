@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 #-------------------------------------------------------------------------------
-# qwiic_template_ex1_title.py TODO: replace template and title
+# qwiic_huskylens_ex1_face_recognition_2d.py
 #
-# TODO: Add description for this example
+# This example shows how to set the Huskylens up for facial recognition and teach it two 2-D faces.
 #-------------------------------------------------------------------------------
-# Written by SparkFun Electronics, TODO: month and year
+# Written by SparkFun Electronics, February 2025
 #
 # This python library supports the SparkFun Electroncis Qwiic ecosystem
 #
@@ -37,77 +37,75 @@ import qwiic_huskylens
 import sys
 import time
 
-learnedBlocks = {} # In the form of {id: name}
-
-def printBlocks(device):
-	myBlocks = device.blocks
-
-	for i, block in enumerate(myBlocks):
-		print("Block #{}".format(i))
-		if block.id in learnedBlocks.keys():
-			print("Block Name: " + learnedBlocks[block.id])
-		print ("Block ID: " + str(block.id))
-		print ("Block X: " + str(block.xCenter))
-		print ("Block Y: " + str(block.yCenter))
-		print ("Block Width: " + str(block.width))
-		print ("Block Height: " + str(block.height))
-		print("\n")
-
 def runExample():
-	print("\nQwiic Huskylens Example 1 - Face Recognition\n")
+	print("\nQwiic Huskylens Example 1 - 2D Face Recognition\n")
 
 	# Create instance of device
-	myDevice = qwiic_huskylens.QwiicHuskylens() 
+	myHuskylens = qwiic_huskylens.QwiicHuskylens() 
 
 	# Check if it's connected
-	if myDevice.is_connected() == False:
+	if myHuskylens.is_connected() == False:
 		print("The device isn't connected to the system. Please check your connection",
 			file=sys.stderr)
 		return
 
 	# Initialize the device
-	myDevice.begin()
+	myHuskylens.begin()
 
-	myDevice.request_forget()
-	myDevice.request_algorithm(myDevice.kAlgorithmFaceRecognition)
+	myHuskylens.request_forget() # Forget all the faces that the device has already learned
+	myHuskylens.request_algorithm(myHuskylens.kAlgorithmFaceRecognition) # The device has several algorithms, we want to use face recognition
 
 	# Prompt user to learn the first face, and ask for the name
-	print("Lets teach the HuskyLens the first face.")
-	name = input("Enter the name of the face you are about to teach the lens: ")
-	print("Please show the face to the camera.")
+	print("Lets teach the HuskyLens the first 2D face.")
+	newName = input("Enter the name of the 2D face you are about to teach the lens: ")
+	print("Please show the face to the camera. Will attempt to learn the face in 3 seconds.")
+	time.sleep(3)
 
 	# The device will return "blocks" when it sees a face while in face recognition mode
-	while (len(myDevice.blocks) == 0):
-		myDevice.request_blocks()
+	while (len(myHuskylens.blocks) == 0):
+		myHuskylens.request_blocks()
 
 	# When the device sees a face, let's learn it!
-	myDevice.request_learn()
-	myDevice.name_last(name)
-	learnedBlocks[1] = name # The first learned face will always have an ID of 1 and will increment from there
+	myHuskylens.learn_new()
+	myHuskylens.name_last(newName)
 	print("Face learned!")
 
 	# Prompt user to learn the second face, and ask for the name
-	print("Lets teach the HuskyLens the second face.")
-	name = input("Enter the name of the face you are about to teach the lens: ")
-	print("Please show the face to the camera.")
-	myDevice.request_blocks()
-	while (len(myDevice.blocks) == 0):
-		myDevice.request_blocks()
+	print("Lets teach the HuskyLens the second 2D face.")
+	newName = input("Enter the name of the 2D face you are about to teach the lens: ")
+	print("Please show the face to the camera. Will attempt to learn the face in 3 seconds.")
+	time.sleep(3)
 
-	myDevice.request_learn()
-	myDevice.name_last(name)
-	learnedBlocks[2] = name
+	myHuskylens.request_blocks()
+	while (len(myHuskylens.blocks) == 0):
+		myHuskylens.request_blocks()
+
+	myHuskylens.learn_new()
+	myHuskylens.name_last(newName)
 	print("Face learned!")
 
 	nScans = 0
 	while True:
-		myDevice.request_blocks()
-		if len(myDevice.blocks) == 0:
+		myHuskylens.request_blocks()
+		if len(myHuskylens.blocks) == 0:
 			print("No blocks found")
 		else:
-			print("----------------------New Blocks Scan #{}----------------------".format(nScans))
-			printBlocks(myDevice)
-			nScans += 1
+			print("----------------------New Faces Scan #{}----------------------".format(nScans))
+			myFaces = myHuskylens.blocks # Each recognized face will be stored in a "block" object containing the face's information
+
+			for i, face in enumerate(myFaces):
+				print("Face #{}".format(i))
+				name = myHuskylens.get_name_for_id(face.id) # The myHuskylens object keeps track of the names we have assigned this program run
+				if name:
+					print("Face Name: " + name)
+				print ("Face ID: " + str(face.id))
+				print ("Face X: " + str(face.xCenter))
+				print ("Face Y: " + str(face.yCenter))
+				print ("Face Width: " + str(face.width))
+				print ("Face Height: " + str(face.height))
+				print("\n")
+
+				nScans += 1
 
 		time.sleep(2)
 

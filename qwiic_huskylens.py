@@ -121,7 +121,7 @@ class QwiicHuskylens(object):
     kAlgorithmTagRecognition = 0x05
     kAlgorithmObjectClassification = 0x06
 
-    def __init__(self, address=None, i2c_driver=None, nLearned = 0):
+    def __init__(self, address=None, i2c_driver=None):
         """!
         Constructor
 
@@ -149,11 +149,10 @@ class QwiicHuskylens(object):
         else:
             self._i2c = i2c_driver
         
-        self.blocks = []
-        self.arrows = []
-
-        # An alternative could be to call forget here and always start from scratch at id = 0
-        self.nLearned = nLearned
+        self.blocks = [] # The blocks (objects, faces, etc.) detected by the Huskylens
+        self.arrows = [] # The arrows (lines) detected by the Huskylens
+        self.nLearned = 0 # The number of objects/IDs already learned
+        self.idToName = {} # A dictionary of IDs to names for learned objects
 
     def _checksum(self, pkt):
         """!
@@ -207,14 +206,20 @@ class QwiicHuskylens(object):
         @param int command: The command to send
         @return _Response: The response from the Huskylens
         """
+        # Sometimes we receive some invalid bytes before the address so we want to read until we get the first header byte
+        readBytes = [0]
+        while readBytes[0] != 0x55:
+            readBytes[0] = self._i2c.read_byte(self.address)
+
         # First read the header, address, data length and command bytes
         # so we know how much data we expect.
-        readBytes = list(self._i2c.read_block(self.address, None, 5))
+        readBytes.extend(list(self._i2c.read_block(self.address, None, 4)))
 
         # Read the rest of the data
         leftToRead = readBytes[3] + 1 # Data length + 1 byte for checksum
         readBytes.extend(list(self._i2c.read_block(self.address, None, leftToRead)))
 
+        print("Read bytes: ", readBytes)
         return self._Response(readBytes)
 
     def request_knock(self):
@@ -256,8 +261,9 @@ class QwiicHuskylens(object):
         # Confirm device is connected before doing anything
         if not self.is_connected():
             return False
-
-        return True
+        
+        # Initialize blocks, arrows and most importantly number of already learned ids with an initial request
+        return self.request()
 
     # TODO: We might want to move these out of the class or make them functions returning dicts
     class _ReturnInfo():
@@ -295,6 +301,7 @@ class QwiicHuskylens(object):
 
         # Get the blocks
         self.blocks = [None] * returnInfo.nBlocksAndArrows
+        self.nLearned = returnInfo.nIDs
 
         for i in range(returnInfo.nBlocksAndArrows):
             response = self._get_response()
@@ -318,6 +325,7 @@ class QwiicHuskylens(object):
 
         # Get the arrows
         self.arrows = [None] * returnInfo.nBlocksAndArrows
+        self.nLearned = returnInfo.nIDs
 
         for i in range(returnInfo.nBlocksAndArrows):
             response = self._get_response()
@@ -342,6 +350,7 @@ class QwiicHuskylens(object):
         # Get the blocks and arrows
         self.blocks = []
         self.arrows = []
+        self.nLearned = returnInfo.nIDs
 
         for i in range(returnInfo.nBlocksAndArrows):
             response = self._get_response()
@@ -506,10 +515,25 @@ class QwiicHuskylens(object):
         data.extend([ord(c) for c in name])
         data.append(0)
         self._send_command(self.kCommandRequestCustomNames, data)
-
-        # TODO: The ICD doesn't specify a response for this command, 
-        # but the other library processes response after sending this...
+        self.idToName[id] = name
     
+    def get_name_for_id(self, id):
+        """!
+        Get the name of a learned object by its ID.
+
+        Note: This will does not query the device and is based on internal program state, so it will not persist across program runs.
+
+        @param int id: The ID of the object
+        @return **str** The name of the object, or `None` if not found
+        """
+        # We store the names in a dictionary, so we can look them up by ID
+        # The device doesn't return this in any way so we have to keep track of it ourselves
+        # The device will show the names on screen however
+        if id not in self.idToName:
+            return None
+        
+        return self.idToName[id]
+
     def name_last(self, name):
         """!
         Set a custom name for the last learned object from the Huskylens
@@ -524,9 +548,6 @@ class QwiicHuskylens(object):
         """
         self._send_command(self.kCommandRequestPhoto)
 
-        # TODO: The ICD doesn't specify a response for this command, 
-        # but the other library processes response after sending this...
-
     def request_send_knowledges(self, fileNum):
         """!
         Save the current algorithms model to the SD Card
@@ -535,9 +556,6 @@ class QwiicHuskylens(object):
         """
         self._send_command(self.kCommandRequestSendKnowledges, [fileNum & 0xFF, fileNum >> 8])
 
-        # TODO: The ICD doesn't specify a response for this command,
-        # but the other library processes response after sending this...
-
     def request_receive_knowledges(self, fileNum):
         """!
         Load a model file from the SD Card to the current algorithm
@@ -545,9 +563,6 @@ class QwiicHuskylens(object):
         @param int fileNum: The file number to load
         """
         self._send_command(self.kCommandRequestReceiveKnowledges, [fileNum & 0xFF, fileNum >> 8])
-    
-        # TODO: The ICD doesn't specify a response for this command,
-        # but the other library processes response after sending this...
 
     def request_custom_text(self, text, x=0, y=0):
         """!
@@ -576,19 +591,33 @@ class QwiicHuskylens(object):
         """
         self._send_command(self.kCommandRequestClearText)
     
-    # Could either enforce ids for learn or create a mapping between assigned id and order of learning 
-    # for use with the custom_name method which actually names based on order learned
-    def request_learn(self):
+    def request_learn(self, id):
+        """!
+        Learn a current recognized object on screen based on its ID
+
+        @param int id: The ID to assign to the object
+        """
+        self._send_command(self.kCommandRequestLearn, [id & 0xFF, id >> 8])
+        
+    def learn_new(self):
         """!
         Learn the current recognized object on screen. It will be assigned an ID starting from nLearned + 1.
         """
         self.nLearned += 1
-        self._send_command(self.kCommandRequestLearn, [self.nLearned & 0xFF, self.nLearned >> 8])
+        self.request_learn(self.nLearned)
     
+    def learn_same(self):
+        """!
+        Learn the current recognized object on screen with the same ID as the last learn call.
+        """
+        self.request_learn(self.nLearned)
+
     def request_forget(self):
         """!
         Forget learned objects for the current running algorithm
         """
+        self.nLearned = 0
+        self.idToName = {}
         self._send_command(self.kCommandRequestForget)
     
     def request_save_screenshot(self):
