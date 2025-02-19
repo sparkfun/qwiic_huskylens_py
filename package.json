@@ -1,9 +1,14 @@
 {
     "urls": [
-      ["qwiic_template.py", "github:sparkfun/Qwiic_Template_Py/qwiic_template.py"]
-    ],
-    "deps": [
-      ["github:sparkfun/Qwiic_I2C_Py", "master"]
+      ["qwiic_huskylens_py_examples/qwiic_huskylens_ex1_face_recognition_2d.py", "github:sparkfun/qwiic_huskylens_py/examples/qwiic_huskylens_ex1_face_recognition_2d.py"],
+      ["qwiic_huskylens_py_examples/qwiic_huskylens_ex2_face_recognition_3d.py", "github:sparkfun/qwiic_huskylens_py/examples/qwiic_huskylens_ex2_face_recognition_3d.py"],
+      ["qwiic_huskylens_py_examples/qwiic_huskylens_ex3_object_tracking.py", "github:sparkfun/qwiic_huskylens_py/examples/qwiic_huskylens_ex3_object_tracking.py"],
+      ["qwiic_huskylens_py_examples/qwiic_huskylens_ex4_object_recognition.py", "github:sparkfun/qwiic_huskylens_py/examples/qwiic_huskylens_ex4_object_recognition.py"],
+      ["qwiic_huskylens_py_examples/qwiic_huskylens_ex5_line_tracking.py", "github:sparkfun/qwiic_huskylens_py/examples/qwiic_huskylens_ex5_line_tracking.py"],
+      ["qwiic_huskylens_py_examples/qwiic_huskylens_ex6_color_recognition.py", "github:sparkfun/qwiic_huskylens_py/examples/qwiic_huskylens_ex6_color_recognition.py"],
+      ["qwiic_huskylens_py_examples/qwiic_huskylens_ex7_tag_recogntion.py", "github:sparkfun/qwiic_huskylens_py/examples/qwiic_huskylens_ex7_tag_recogntion.py"],
+      ["qwiic_huskylens_py_examples/qwiic_huskylens_ex8_object_classification.py", "github:sparkfun/qwiic_huskylens_py/examples/qwiic_huskylens_ex8_object_classification.py"],
+      ["qwiic_huskylens_py_examples/qwiic_huskylens_ex9_write_to_screen.py", "github:sparkfun/qwiic_huskylens_py/examples/qwiic_huskylens_ex9_write_to_screen.py"]
     ],
     "version": "1.0.0"
 }
