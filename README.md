@@ -8,9 +8,9 @@
 ![X](https://img.shields.io/twitter/follow/sparkfun)
 [![API](https://img.shields.io/badge/API%20Reference-blue)](https://docs.sparkfun.com/qwiic_huskylens_py/classqwiic__huskylens_1_1_qwiic_huskylens.html)
 
-The SparkFun Qwiic AI Camera HUSKYLENS Module provides a simple and cost effective solution for adding AI Camera capabilities to your project. Implementing a SparkFun Qwiic I2C interface, these sensors can be rapidly added to any project with boards that are part of the SparkFun Qwiic ecosystem.
+The DFRobot Huskylens Module provides a simple and cost effective solution for adding AI Camera capabilities to your project. Implementing an I2C interface, these sensors can be rapidly added to any project with boards that are part of the SparkFun Qwiic ecosystem.
 
-This repository implements a Python package for the SparkFun Qwiic HUSKYLENS. This package works with Python, MicroPython and CircuitPython.
+This repository implements a Python package for the DFRobot Huskylens. This package works with Python, MicroPython and CircuitPython.
 
 ### Contents
 
