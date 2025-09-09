@@ -71,9 +71,11 @@ def runExample():
         print()
         print("Would you like to name what was just learned?")
         print("The HuskyLens will show this name when it recognizes the object.")
-        name = input("Enter a name, or enter nothing to skip: ")
-        if name != '':
-            myHuskyLens.name_last(name)
+        name = input("Enter a name, or enter nothing to clear the name: ")
+        myHuskyLens.name_last(name)
+        if name == '':
+            print("Name cleared")
+        else:
             print("Name set to: " + name)
 
         # Ask user if they want to continue learning the same thing
@@ -86,6 +88,7 @@ def runExample():
         # Loop to continue learning the same thing
         while True:
             # Prompt user to learn the same thing again
+            print()
             print("Point the HuskyLens at the same thing again.")
             val = input("Enter 'q' to quit, or anything else to continue learning: ")
             if val == 'q':
