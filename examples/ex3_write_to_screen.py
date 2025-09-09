@@ -5,7 +5,7 @@
 #-------------------------------------------------------------------------------
 # ex3_write_to_screen.py
 #
-# This example
+# This example shows how to write text to the screen of the HuskyLens.
 #-------------------------------------------------------------------------------
 
 import qwiic_huskylens 
