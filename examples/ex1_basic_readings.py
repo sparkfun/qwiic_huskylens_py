@@ -56,11 +56,6 @@ def runExample():
             # Every object has an ID. 0 indicates it's an unknown object
             print("Object ID: " + str(object.id))
 
-            # Some objects can be assigned names. Print the name if it has one
-            name = myHuskyLens.get_name_for_id(object.id)
-            if name:
-                print("Object Name: " + name)
-            
             # Every object has a bounding box, defined by its center point, and
             # its width and height
             print("Object X: " + str(object.xCenter))

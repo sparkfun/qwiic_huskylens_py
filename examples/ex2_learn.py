@@ -70,6 +70,7 @@ def runExample():
         # Prompt user to name what was just learned
         print()
         print("Would you like to name what was just learned?")
+        print("The HuskyLens will show this name when it recognizes the object.")
         name = input("Enter a name, or enter nothing to skip: ")
         if name != '':
             myHuskyLens.name_last(name)
@@ -109,7 +110,8 @@ def runExample():
 
     # Instead of `name_last(name)`, you can use `request_custom_names(id, name)`
     # to manually specify the ID value to name. This can be useful if you want
-    # to set the names of objects after learning, or rename objects.
+    # to set the names of objects after learning, or rename objects. Setting
+    # `name=''` will clear the name for that ID.
     # myHuskyLens.request_custom_name(id, name)
 
     # Main loop
@@ -136,11 +138,6 @@ def runExample():
             # Every object has an ID. 0 indicates it's an unknown object
             print("Object ID: " + str(object.id))
 
-            # Some objects can be assigned names. Print the name if it has one
-            name = myHuskyLens.get_name_for_id(object.id)
-            if name:
-                print("Object Name: " + name)
-            
             # Every object has a bounding box, defined by its center point, and
             # its width and height
             print("Object X: " + str(object.xCenter))
