@@ -14,6 +14,15 @@ import qwiic_huskylens
 import sys
 import time
 
+# Uncomment one of these lines to set the algorithm to use
+algorithm = kAlgorithmFaceRecognition = 0x00
+# algorithm = kAlgorithmObjectTracking = 0x01
+# algorithm = kAlgorithmObjectRecognition = 0x02
+# algorithm = kAlgorithmLineTracking = 0x03
+# algorithm = kAlgorithmColorRecognition = 0x04
+# algorithm = kAlgorithmTagRecognition = 0x05
+# algorithm = kAlgorithmObjectClassification = 0x06
+
 def runExample():
     print("\nQwiic HuskyLens Example 2 - Learn\n")
 
@@ -32,14 +41,8 @@ def runExample():
             file=sys.stderr)
         return
 
-    # Print available algorithms and prompt user to select one
-    for key, value in myHuskyLens.kAlgorithm.items():
-        print("{} : {}".format(value, key))
-    algorithm = int(input("Enter the algorithm number you want to use: "))
-    if myHuskyLens.set_algorithm(algorithm) == False:
-        print("Failed to set algorithm, please check your input",
-            file=sys.stderr)
-        return
+    # Set the algorithm to use
+    myHuskyLens.set_algorithm(algorithm)
 
     # Ask user if they want to forget all learned data for this algorithm
     print()

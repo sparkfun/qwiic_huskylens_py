@@ -45,7 +45,6 @@ New to Qwiic? Take a look at the entire [SparkFun Qwiic ecosystem](https://www.s
 # The Qwiic_I2C_Py platform driver is designed to work on almost any Python
 # platform, check it out here: https://github.com/sparkfun/Qwiic_I2C_Py
 import qwiic_i2c
-from collections import OrderedDict
 
 _DEFAULT_NAME = "Qwiic HuskyLens"
 
@@ -108,15 +107,13 @@ class QwiicHuskyLens(object):
 
     # Algorithms 
     # Note, algorithms are 16-bit values, but existing commands only use the low byte and have 0 for the high byte
-    kAlgorithm = OrderedDict([
-        ("Face Recognition", 0x00),
-        ("Object Tracking", 0x01),
-        ("Object Recognition", 0x02),
-        ("Line Tracking", 0x03),
-        ("Color Recognition", 0x04),
-        ("Tag Recognition", 0x05),
-        ("Object Classification", 0x06)
-    ])
+    kAlgorithmFaceRecognition = 0x00
+    kAlgorithmObjectTracking = 0x01
+    kAlgorithmObjectRecognition = 0x02
+    kAlgorithmLineTracking = 0x03
+    kAlgorithmColorRecognition = 0x04
+    kAlgorithmTagRecognition = 0x05
+    kAlgorithmObjectClassification = 0x06
 
     def __init__(self, address=None, i2c_driver=None):
         """!
@@ -534,7 +531,13 @@ class QwiicHuskyLens(object):
 
         @return **bool** `True` if successful, otherwise `False`.
         """
-        if algorithm not in self.kAlgorithm.values():
+        if algorithm not in [self.kAlgorithmFaceRecognition, 
+                            self.kAlgorithmObjectTracking, 
+                            self.kAlgorithmObjectRecognition, 
+                            self.kAlgorithmLineTracking, 
+                            self.kAlgorithmColorRecognition, 
+                            self.kAlgorithmTagRecognition, 
+                            self.kAlgorithmObjectClassification]:
             return False
 
         # Send the request
