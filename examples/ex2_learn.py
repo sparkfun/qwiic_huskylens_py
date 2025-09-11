@@ -14,15 +14,6 @@ import qwiic_huskylens
 import sys
 import time
 
-# Uncomment one of these lines to set the algorithm to use
-algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmFaceRecognition
-# algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmObjectTracking
-# algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmObjectRecognition
-# algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmLineTracking
-# algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmColorRecognition
-# algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmTagRecognition
-# algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmObjectClassification
-
 def runExample():
     print("\nQwiic HuskyLens Example 2 - Learn\n")
 
@@ -40,6 +31,15 @@ def runExample():
         print("Failed to initialize the device, please check your connection",
             file=sys.stderr)
         return
+
+    # Uncomment one of these lines to set the algorithm to use
+    algorithm = myHuskyLens.kAlgorithmFaceRecognition
+    # algorithm = myHuskyLens.kAlgorithmObjectTracking
+    # algorithm = myHuskyLens.kAlgorithmObjectRecognition
+    # algorithm = myHuskyLens.kAlgorithmLineTracking
+    # algorithm = myHuskyLens.kAlgorithmColorRecognition
+    # algorithm = myHuskyLens.kAlgorithmTagRecognition
+    # algorithm = myHuskyLens.kAlgorithmObjectClassification
 
     # Set the algorithm to use
     myHuskyLens.set_algorithm(algorithm)
@@ -61,7 +61,7 @@ def runExample():
             break
 
         # Wait for the HuskyLens to see something
-        if algorithm == myHuskyLens.kAlgorithm["Line Tracking"]:
+        if algorithm == myHuskyLens.kAlgorithmLineTracking:
             myHuskyLens.wait_for_lines_of_interest()
         else:
             myHuskyLens.wait_for_objects_of_interest()
@@ -98,7 +98,7 @@ def runExample():
                 break
 
             # Wait for the HuskyLens to see something
-            if algorithm == myHuskyLens.kAlgorithm["Line Tracking"]:
+            if algorithm == myHuskyLens.kAlgorithmLineTracking:
                 myHuskyLens.wait_for_lines_of_interest()
             else:
                 myHuskyLens.wait_for_objects_of_interest()
