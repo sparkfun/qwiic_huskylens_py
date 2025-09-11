@@ -15,13 +15,13 @@ import sys
 import time
 
 # Uncomment one of these lines to set the algorithm to use
-algorithm = kAlgorithmFaceRecognition = 0x00
-# algorithm = kAlgorithmObjectTracking = 0x01
-# algorithm = kAlgorithmObjectRecognition = 0x02
-# algorithm = kAlgorithmLineTracking = 0x03
-# algorithm = kAlgorithmColorRecognition = 0x04
-# algorithm = kAlgorithmTagRecognition = 0x05
-# algorithm = kAlgorithmObjectClassification = 0x06
+algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmFaceRecognition
+# algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmObjectTracking
+# algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmObjectRecognition
+# algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmLineTracking
+# algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmColorRecognition
+# algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmTagRecognition
+# algorithm = qwiic_huskylens.QwiicHuskyLens.kAlgorithmObjectClassification
 
 def runExample():
     print("\nQwiic HuskyLens Example 2 - Learn\n")
