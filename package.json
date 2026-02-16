@@ -2,7 +2,7 @@
     "urls": [
       ["qwiic_huskylens_py_examples/ex1_basic_readings.py", "github:sparkfun/qwiic_huskylens_py/examples/ex1_basic_readings.py"],
       ["qwiic_huskylens_py_examples/ex2_learn.py", "github:sparkfun/qwiic_huskylens_py/examples/ex2_learn.py"],
-      ["qwiic_huskylens_py_examples/ex3_write_to_screen.py", "github:sparkfun/qwiic_huskylens_py/examples/ex3_write_to_screen.py"],
+      ["qwiic_huskylens_py_examples/ex3_write_to_screen.py", "github:sparkfun/qwiic_huskylens_py/examples/ex3_write_to_screen.py"]
     ],
     "version": "2.0.1"
 }
